@@ -19,11 +19,11 @@ from __future__ import annotations
 import argparse
 import csv
 import itertools
+import os
 from pathlib import Path
 import shlex
 import subprocess
 from typing import Iterable, List, Tuple
-from concurrent.futures import ThreadPoolExecutor
 
 
 def find_fasta_files(directory: Path) -> List[Path]:
@@ -99,13 +99,6 @@ def main() -> None:
     parser.add_argument(
         "--coords-args", default="", help="Additional arguments to pass to show-coords"
     )
-    parser.add_argument(
-        "-t",
-        "--threads",
-        type=int,
-        default=1,
-        help="Number of parallel threads to use",
-    )
     args = parser.parse_args()
 
     files = find_fasta_files(args.input_dir)
@@ -134,17 +127,10 @@ def main() -> None:
         "QRY_TAG",
     ]
 
-    pairs = list(pairwise_files(files, args.include_self, args.both_directions))
-
-    def process_pair(pair: Tuple[Path, Path]) -> List[List[str]]:
-        ref, qry = pair
+    for ref, qry in pairwise_files(files, args.include_self, args.both_directions):
         delta = run_nucmer(ref, qry, args.output_dir, args.nucmer_args)
         coords = run_show_coords(delta, args.output_dir, args.coords_args)
-        return parse_coords_file(coords, ref, qry)
-
-    with ThreadPoolExecutor(max_workers=args.threads) as executor:
-        for rows in executor.map(process_pair, pairs):
-            all_rows.extend(rows)
+        all_rows.extend(parse_coords_file(coords, ref, qry))
 
     # Write aggregated table
     agg_path = args.output_dir / "all_coords.tsv"
