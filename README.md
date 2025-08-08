@@ -10,8 +10,9 @@ results from show-coords into a single table.
 ### Example
 
 ```bash
-python all_vs_all_nucmer.py plasmids/ -o results/ --nucmer-args "--maxmatch"
+python all_vs_all_nucmer.py plasmids/ -o results/ --nucmer-args "--maxmatch" -t 4
 ```
 
-The command above creates `results/` with `.delta` and `.coords` files for each
-pair and an `all_coords.tsv` summary of every alignment.
+The command above runs pairwise comparisons using four threads, creating
+`results/` with `.delta` and `.coords` files for each pair and an
+`all_coords.tsv` summary of every alignment.
