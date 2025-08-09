@@ -49,7 +49,7 @@ def run_nucmer(ref: Path, qry: Path, outdir: Path, extra_args: str) -> Path:
     """Execute nucmer and return the resulting ``.delta`` path."""
     prefix = outdir / f"{ref.stem}_vs_{qry.stem}"
     cmd = ["nucmer", "-p", str(prefix)] + shlex.split(extra_args) + [str(ref), str(qry)]
-    subprocess.run(cmd, check=True)
+    subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     return prefix.with_suffix(".delta")
 
 
@@ -61,7 +61,7 @@ def run_show_coords(delta: Path, outdir: Path, extra_args: str) -> Path:
         "-rclTH",
     ] + shlex.split(extra_args) + [str(delta)]
     with coords_path.open("w") as fh:
-        subprocess.run(cmd, check=True, stdout=fh)
+        subprocess.run(cmd, check=True, stdout=fh, stderr=subprocess.DEVNULL)
     return coords_path
 
 
